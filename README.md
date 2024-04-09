@@ -27,3 +27,6 @@ To use this software/firmware on a device, you'll need:
     ```
     particle serial monitor --follow
     ```
+
+## TODO
+- [ ] add a pinout diagram and temperature probe model numbers
