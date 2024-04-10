@@ -30,3 +30,74 @@ To use this software/firmware on a device, you'll need:
 
 ## TODO
 - [ ] add a pinout diagram and temperature probe model numbers
+
+
+## Architecture & Ecosystem
+
+Notes about how the whole product is plumbed:
+
+1. The Particle firmware publishes an event to the Particle cloud (via `Particle.publish()`) whenever new temperature data is available.  The event is named `sauna/temperature` and has a JSON payload:
+
+        {
+            "temperatureInside":124.3
+            "temperatureOutside":70
+            "timestampMs":3338008192
+        }
+
+2. There is a webhook defined in the Particle Cloud Dashboard that is triggered by this event and sends a POST request to Mongo Atlas to insert a record into a Mongo database. There's actually 2 webooks: one inserts a new record into the `temperature` collection as a historical log and the other _replaces_ the entry in the `latest-temperature` collection.  The Particle webook config looks like this:
+
+    <table>
+    <tr>
+    <td>Name</td><td>Send sauna temperature to Mongo as latest temperature</td>
+    </tr>
+    <tr>
+    <td>Event Name</td><td>sauna/temperature</td>
+    </tr>
+    <tr>
+    <td>Full URL</td><td>https://us-west-2.aws.data.mongodb-api.com/app/data-vgwek/endpoint/data/v1/action/replaceOne</td>
+    </tr>
+    <tr>
+    <td>Request Type</td><td>POST</td>
+    </tr>
+    <tr>
+    <td>Request Format</td><td>Custom Body</td>
+    </tr>
+    <tr>
+    <td>Custom Body</td>
+    <td>
+
+    ```json
+    { 
+        "dataSource": "sandbox", 
+        "database": "sauna",
+        "collection": "latest-temperature",
+        "filter": {
+            "_id": {
+                "$oid": "66163f479c4b5e9f0b5a2978"
+            }
+        },
+        "replacement": {{{PARTICLE_EVENT_VALUE}}}
+    }
+    ```
+
+    </td>
+    </tr>
+    <tr>
+    <td>Headers</td>
+    <td>
+
+    ```json
+    {
+    "apiKey": "<MONGO_ATLAS_API_KEY>",
+    "content-type": "application/json",
+    "Accept": "application/json"
+    }
+    ```
+
+    </td>
+    </tr>
+    <tr>
+    <td>Enforce SSL</td><td>Yes</td>
+    </tr>
+    </table>
+
