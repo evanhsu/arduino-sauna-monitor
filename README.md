@@ -11,9 +11,7 @@ to the Particle Cloud. The use-case that this was developed for is to monitor th
 To use this software/firmware on a device, you'll need:
 
 - A [Particle Device](https://www.particle.io/devices/).
-- Windows/Mac/Linux for building the software and flashing it to a device.
 - [Particle Development Tools](https://docs.particle.io/getting-started/developer-tools/developer-tools/) installed and set up on your computer.
-- Optionally, a nice cup of tea (and perhaps a biscuit).
 
 ## Getting Started
 
@@ -27,6 +25,10 @@ To use this software/firmware on a device, you'll need:
     ```
     particle serial monitor --follow
     ```
+
+## Hardware
+- uProcessor: Particle Photon (P1)
+- Temperature sensors: [Gikfun DS18B20 Temperature Sensor](https://www.amazon.com/dp/B012C597T0)
 
 ## TODO
 - [ ] add a pinout diagram and temperature probe model numbers
@@ -101,3 +103,8 @@ Notes about how the whole product is plumbed:
     </tr>
     </table>
 
+3. In Mongo Atlas, there's a Trigger defined on the `latest-temperature` Collection that runs whenever a record is replaced 
+(this collection is really only intended to contain a single entry that just gets continuously replaced).
+This trigger runs a nodeJS script that publishes an event to [Pusher](pusher.com) with the updated Mongodb document in the payload.
+
+4. The web frontend (Docusaurus) is subscribed to the Pusher channel and receives the temperature updates from Pusher.
