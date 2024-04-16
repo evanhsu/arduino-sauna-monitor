@@ -2,10 +2,14 @@
   "extensions.ignoreRecommendations": true,
   "C_Cpp.default.configurationProvider": "particle.particle-vscode-core",
   "files.associations": {
-    "*.ino": "cpp"
-  },
+    "*.ptrac": "json",
+    ".env": "dotenv",
+    "*.ino": "cpp",
+    "ostream": "cpp"
+},
   "particle.firmwareVersion": "3.3.1",
   "particle.targetPlatform": "photon",
 "editor.defaultFormatter": "ms-vscode.cpptools",
-"editor.formatOnSave": true
+"editor.formatOnSave": true,
+"particle.targetDevice": "motorhead"
 }
