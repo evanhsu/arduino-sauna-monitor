@@ -86,15 +86,18 @@ String phase = "OFF";
 SerialLogHandler logHandler(LOG_LEVEL_INFO);
 
 bool publishData(float temperatureInside, float temperatureOutside, String phase) {
-    unsigned long timestampMs = Time.now() * 1000;
+    char timestampChar[10];
     char buf[256];
     JSONBufferWriter writer(buf, sizeof(buf) - 1);
+
+    unsigned long timestamp = Time.now();
+    sprintf(timestampChar, "%lu", timestamp);
 
     writer.beginObject();
     writer.name("temperatureInside").value(temperatureInside);
     writer.name("temperatureOutside").value(temperatureOutside);
     writer.name("phase").value(phase);
-    writer.name("timestampMs").value(timestampMs); // TODO: this long-to-string conversion doesn't seem right
+    writer.name("timestamp").value(timestampChar);
     writer.endObject();
 
     writer.buffer()[std::min(writer.bufferSize(), writer.dataSize())] = 0;
@@ -184,7 +187,8 @@ String determinePhase() {
         return "READY";
     }
 
-    if (deltaT_inside > 0 && deltaT_inside > deltaT_outside) {
+    // Using 0.2 degrees F as a naive margin to prevent false positives
+    if (deltaT_inside > 0.2 && deltaT_inside > (deltaT_outside + 0.2)) {
         return "HEATING";
     }
 
